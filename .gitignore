@@ -169,3 +169,12 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Ruff Cache
+.ruff_cache
+
+# Bash File
+*.sh
+
+# Test File
+/temp
