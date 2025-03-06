@@ -88,7 +88,7 @@ def main(
         logging.info(f"Added {config['name']} result to row")
 
     # Save the complete row with all results
-    row_image.save(f"temp/output_{subject}.png")
+    row_image.save(f"output_{subject}.png")
     logging.info("Saved image")
 
 

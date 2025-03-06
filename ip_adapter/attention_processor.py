@@ -276,6 +276,7 @@ class ConceptrolAttnProcessor(nn.Module):
             concept_mask_layer = [
                 "mid_block.attentions.0.transformer_blocks.0.attn2.processor"
             ]  # For SD
+            print("Warning: Using default concept mask layer for SD. For SDXL, use 'up_blocks.0.attentions.1.transformer_blocks.5.attn2.processor'")
             # concept_mask_layer = ['up_blocks.0.attentions.1.transformer_blocks.1.attn2.processor'] # For SDXL
         self.concept_mask_layer = concept_mask_layer
 
@@ -361,9 +362,6 @@ class ConceptrolAttnProcessor(nn.Module):
         hidden_states = torch.bmm(attention_probs, value)
         hidden_states = attn.batch_to_head_dim(hidden_states)
 
-        # for ip-adapter
-        # concept_mask_layer = ['mid_block.attentions.0.transformer_blocks.0.attn2.processor']
-        # concept_mask_layer = ['up_blocks.0.attentions.1.transformer_blocks.1.attn2.processor']
         concept_mask_layer = self.concept_mask_layer
         if len(global_concept_mask) == 0:
             global_concept_mask = [None for _ in range(len(self.textual_concept_idxs))]
@@ -378,6 +376,8 @@ class ConceptrolAttnProcessor(nn.Module):
             ip_key = attn.head_to_batch_dim(ip_key)  # [16, 4, 40]
             ip_value = attn.head_to_batch_dim(ip_value)  # [16, 4, 40]
 
+            # attention_probs: [20/40, 4096, 77]
+
             ip_attention_mask = attention_probs[
                 :, :, textual_concept_start_idx:textual_concept_end_idx
             ]  # [16, 4096, T]
@@ -390,9 +390,11 @@ class ConceptrolAttnProcessor(nn.Module):
             ip_attention_mask = torch.mean(
                 ip_attention_mask, dim=-1, keepdim=True
             )  # [2, 4096, 1]
+
             ip_attention_mask = ip_attention_mask / (
                 torch.amax(ip_attention_mask, dim=-2, keepdim=True) + 1e-6
             )
+
             ip_attention_mask = ip_attention_mask[1:2]  # (use the classifier one)
 
             # Visualization
@@ -406,6 +408,11 @@ class ConceptrolAttnProcessor(nn.Module):
             text_attn_map_logs[self.name].append(
                 ip_attention_mask.detach().cpu().numpy()[0, :, 0]
             )
+
+            if self.global_masking and (
+                self.name == concept_mask_layer[0]
+            ):
+                global_concept_mask[i] = ip_attention_mask
 
             if (
                 self.global_masking
@@ -426,11 +433,6 @@ class ConceptrolAttnProcessor(nn.Module):
                     global_concept_mask[i].shape[0], -1, 1
                 )
                 ip_attention_mask = resized_global_concept_mask
-                print(f"Using global concept mask: {self.name}")
-            if self.global_masking and (
-                self.name == concept_mask_layer[0] or global_concept_mask[i] is None
-            ):
-                global_concept_mask[i] = ip_attention_mask
 
             ip_attention_probs = attn.get_attention_scores(
                 query, ip_key, None
@@ -460,25 +462,12 @@ class ConceptrolAttnProcessor(nn.Module):
             ip_hidden_states = attn.batch_to_head_dim(
                 ip_hidden_states
             )  # [2, 4096, 320]
-            # ip_hidden_states = ip_hidden_states * ip_attention_mask # TODO: Go back to uncomment after doing analysis
+            ip_hidden_states = ip_hidden_states * ip_attention_mask
 
             if self.adaptive_scale_mask:
-                hidden_states_concept_region = (
-                    hidden_states * ip_attention_mask
-                )  # [2, 4096, 320]
-                hidden_states_influence = torch.mean(
-                    torch.abs(hidden_states_concept_region), dim=(-2, -1), keepdim=True
-                )  # [2, 1, 1]
-                ip_hidden_states_influence = torch.mean(
-                    torch.abs(ip_hidden_states), dim=(-2, -1), keepdim=True
-                )  # [2, 1, 1]
-                scale = hidden_states_influence / (ip_hidden_states_influence + 1e-6)
-                scale = torch.where(scale > 1, scale, torch.ones_like(scale))
-                ip_hidden_states = ip_hidden_states * scale
-            else:
-                ip_hidden_states = self.scale * ip_attention_mask * ip_hidden_states
+                raise ValueError("adaptive_scale_mask is deprecated already")
 
-            hidden_states += ip_hidden_states
+            hidden_states += self.scale * ip_hidden_states
 
         # linear proj
         hidden_states = attn.to_out[0](hidden_states)
