@@ -10,7 +10,7 @@
 
 ## 🚗 Quick Start
 
-1. Environment Setup
+#### 1. Environment Setup
 
 ``` bash
 conda create -n conceptrol python=3.10
@@ -18,7 +18,18 @@ conda activate conceptrol
 pip install -r requirements.txt
 ```
 
-2. Go to `demo_sd.ipynb` / `demo_sdxl.ipynb` / `demo_flux.py` for fun!
+#### 2. Go to `demo_sd.ipynb` / `demo_sdxl.ipynb` / `demo_flux.py` for fun!
+
+## 🛳️ Local Setup using Gradio
+
+#### 1. Start Gradio Interface
+``` bash
+pip install gradio
+gradio gradio_src/app.py
+```
+
+#### 2. Use the GUI for fun!
+
 
 ## ❤️ Acknowledgement
 
