@@ -67,11 +67,11 @@ def main(
         logging.info(f"Starting {config['name']} with scale {scale} for {subject}")
 
         conceptrol = Conceptrol(config)
+        pipeline.load_conceptrol(conceptrol)
         generated_img = pipeline(
             prompt=prompt,
             image=image,
             subject=subject,
-            conceptrol=conceptrol,
             num_inference_steps=20,
             guidance_scale=3.5,
             condition_scale=scale,

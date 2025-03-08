@@ -178,3 +178,6 @@ cython_debug/
 
 # Test File
 /temp
+
+# Output
+output*

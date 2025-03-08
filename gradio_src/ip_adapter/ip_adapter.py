@@ -267,7 +267,7 @@ class ConceptrolIPAdapter:
         ip_ckpt,
         device,
         num_tokens=4,
-        global_masking=True,
+        global_masking=False,
         adaptive_scale_mask=False,
     ):
         self.device = device
