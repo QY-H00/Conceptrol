@@ -276,7 +276,9 @@ class ConceptrolAttnProcessor(nn.Module):
             concept_mask_layer = [
                 "mid_block.attentions.0.transformer_blocks.0.attn2.processor"
             ]  # For SD
-            print("Warning: Using default concept mask layer for SD. For SDXL, use 'up_blocks.0.attentions.1.transformer_blocks.5.attn2.processor'")
+            print(
+                "Warning: Using default concept mask layer for SD. For SDXL, use 'up_blocks.0.attentions.1.transformer_blocks.5.attn2.processor'"
+            )
             # concept_mask_layer = ['up_blocks.0.attentions.1.transformer_blocks.1.attn2.processor'] # For SDXL
         self.concept_mask_layer = concept_mask_layer
 
@@ -409,9 +411,7 @@ class ConceptrolAttnProcessor(nn.Module):
                 ip_attention_mask.detach().cpu().numpy()[0, :, 0]
             )
 
-            if self.global_masking and (
-                self.name == concept_mask_layer[0]
-            ):
+            if self.global_masking and (self.name == concept_mask_layer[0]):
                 global_concept_mask[i] = ip_attention_mask
 
             if (

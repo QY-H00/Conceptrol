@@ -358,29 +358,33 @@ class ConceptrolIPAdapter:
             if ":" in self.ip_ckpt:
                 repo_id, filename = self.ip_ckpt.split(":", 1)
             else:
-                parts = self.ip_ckpt.split('/')
+                parts = self.ip_ckpt.split("/")
                 if len(parts) > 2:
                     # For example, "h94/IP-Adapter/models/ip-adapter-plus_sd15.bin"
                     # repo_id becomes "h94/IP-Adapter" and filename "models/ip-adapter-plus_sd15.bin".
-                    repo_id = '/'.join(parts[:2])
-                    filename = '/'.join(parts[2:])
+                    repo_id = "/".join(parts[:2])
+                    filename = "/".join(parts[2:])
                 else:
                     repo_id = self.ip_ckpt
                     filename = "models/ip-adapter-plus_sd15.bin"  # default filename if not specified
             ckpt_path = hf_hub_download(repo_id=repo_id, filename=filename)
-        
+
         # Load the state dictionary from the checkpoint file.
         if os.path.splitext(ckpt_path)[-1] == ".safetensors":
             state_dict = {"image_proj": {}, "ip_adapter": {}}
             with safe_open(ckpt_path, framework="pt", device="cpu") as f:
                 for key in f.keys():
                     if key.startswith("image_proj."):
-                        state_dict["image_proj"][key.replace("image_proj.", "")] = f.get_tensor(key)
+                        state_dict["image_proj"][key.replace("image_proj.", "")] = (
+                            f.get_tensor(key)
+                        )
                     elif key.startswith("ip_adapter."):
-                        state_dict["ip_adapter"][key.replace("ip_adapter.", "")] = f.get_tensor(key)
+                        state_dict["ip_adapter"][key.replace("ip_adapter.", "")] = (
+                            f.get_tensor(key)
+                        )
         else:
             state_dict = torch.load(ckpt_path, map_location="cpu")
-        
+
         # Load the state dictionaries into the corresponding models.
         self.image_proj_model.load_state_dict(state_dict["image_proj"])
         ip_layers = torch.nn.ModuleList(self.pipe.unet.attn_processors.values())
@@ -413,7 +417,7 @@ class ConceptrolIPAdapter:
     def load_textual_concept(self, prompt, subjects):
         tokens = self.tokenizer.tokenize(prompt)
         textual_concept_idxs = []
-        offset = 1 # TODO: change back to 1 if not true
+        offset = 1  # TODO: change back to 1 if not true
 
         for subject in subjects:
             subject_tokens = self.tokenizer.tokenize(subject)

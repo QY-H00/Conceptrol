@@ -63,40 +63,45 @@ pipe = StableDiffusionCustomPipeline.from_pretrained(
     "SG161222/Realistic_Vision_V5.1_noVAE",
     torch_dtype=torch.float16,
     feature_extractor=None,
-    safety_checker=None
+    safety_checker=None,
 )
 pipeline = ConceptrolIPAdapterPlus(pipe, "", adapter_name, device, num_tokens=16)
 
+
 def change_model_fn(model_name: str) -> None:
     global device, pipeline
-    
+
     # Clear GPU memory
     if torch.cuda.is_available():
         if pipeline is not None:
             del pipeline
         torch.cuda.empty_cache()
-        
+
     name_mapping = {
-        "SD1.5-512": "stable-diffusion-v1-5/stable-diffusion-v1-5", 
+        "SD1.5-512": "stable-diffusion-v1-5/stable-diffusion-v1-5",
         "AOM3 (SD-based)": "hogiahien/aom3",
         "RealVis-v5.1 (SD-based)": "SG161222/Realistic_Vision_V5.1_noVAE",
         "SDXL-1024": "stabilityai/stable-diffusion-xl-base-1.0",
         "RealVisXL-v5.0 (SDXL-based)": "SG161222/RealVisXL_V5.0",
         "Playground-XL-v2 (SDXL-based)": "playgroundai/playground-v2.5-1024px-aesthetic",
         "Animagine-XL-v4.0 (SDXL-based)": "cagliostrolab/animagine-xl-4.0",
-        "FLUX-schnell": "black-forest-labs/FLUX.1-schnell"
+        "FLUX-schnell": "black-forest-labs/FLUX.1-schnell",
     }
     if "XL" in model_name:
-        adapter_name = "h94/IP-Adapter/sdxl_models/ip-adapter-plus_sdxl_vit-h.safetensors"
+        adapter_name = (
+            "h94/IP-Adapter/sdxl_models/ip-adapter-plus_sdxl_vit-h.safetensors"
+        )
         pipe = StableDiffusionXLCustomPipeline.from_pretrained(
             name_mapping[model_name],
             # variant="fp16",
             torch_dtype=torch.float16,
-            feature_extractor=None
+            feature_extractor=None,
         )
-        pipeline = ConceptrolIPAdapterPlusXL(pipe, "", adapter_name, device, num_tokens=16)
+        pipeline = ConceptrolIPAdapterPlusXL(
+            pipe, "", adapter_name, device, num_tokens=16
+        )
         globals()["pipeline"] = pipeline
-    
+
     elif "FLUX" in model_name:
         adapter_name = "Yuanshi/OminiControl"
         pipeline = FluxConceptrolPipeline.from_pretrained(
@@ -112,16 +117,18 @@ def change_model_fn(model_name: str) -> None:
         pipeline.load_conceptrol(conceptrol)
         globals()["pipeline"] = pipeline
         globals()["pipeline"].to(device, dtype=torch.bfloat16)
-    
+
     elif "XL" not in model_name and "FLUX" not in model_name:
         adapter_name = "h94/IP-Adapter/models/ip-adapter-plus_sd15.bin"
         pipe = StableDiffusionCustomPipeline.from_pretrained(
             name_mapping[model_name],
             torch_dtype=torch.float16,
             feature_extractor=None,
-            safety_checker=None
+            safety_checker=None,
         )
-        pipeline = ConceptrolIPAdapterPlus(pipe, "", adapter_name, device, num_tokens=16)
+        pipeline = ConceptrolIPAdapterPlus(
+            pipe, "", adapter_name, device, num_tokens=16
+        )
         globals()["pipeline"] = pipeline
     else:
         raise KeyError("Not supported model name!")
@@ -146,7 +153,7 @@ def get_example() -> list[list[str | float | int]]:
             1.0,
             0.2,
             42,
-            "RealVis-v5.1 (SD-based)"
+            "RealVis-v5.1 (SD-based)",
         ],
         [
             "A hyper-realistic, high-resolution photograph of an astronaut in a meticulously detailed space suit riding a majestic horse across an otherworldly landscape. The image features dynamic lighting, rich textures, and a cinematic atmosphere, capturing every intricate detail in stunning clarity.",
@@ -158,7 +165,7 @@ def get_example() -> list[list[str | float | int]]:
             1.0,
             0.2,
             42,
-            "RealVisXL-v5.0 (SDXL-based)"
+            "RealVisXL-v5.0 (SDXL-based)",
         ],
         [
             "A man wearing a T-shirt walking on the street",
@@ -170,8 +177,8 @@ def get_example() -> list[list[str | float | int]]:
             1.0,
             0.0,
             42,
-            "FLUX-schnell"
-        ]
+            "FLUX-schnell",
+        ],
     ]
     return case
 
@@ -198,7 +205,7 @@ def generate(
     condition_scale=1.0,
     control_guidance_start=0.0,
     seed=0,
-    model_name="RealVis-v5.1 (SD-based)"
+    model_name="RealVis-v5.1 (SD-based)",
 ) -> np.ndarray:
     global pipeline
     change_model_fn(model_name)
@@ -215,7 +222,9 @@ def generate(
             width=512,
             seed=seed,
         ).images[0]
-    elif isinstance(pipeline, ConceptrolIPAdapterPlus) or isinstance(pipeline, ConceptrolIPAdapterPlusXL):
+    elif isinstance(pipeline, ConceptrolIPAdapterPlus) or isinstance(
+        pipeline, ConceptrolIPAdapterPlusXL
+    ):
         images = pipeline.generate(
             prompt=prompt,
             pil_images=[image],
@@ -231,6 +240,7 @@ def generate(
         raise TypeError("Unsupported Pipeline")
 
     return images
+
 
 with gr.Blocks(css="style.css") as demo:
     gr.Markdown(title)
@@ -258,24 +268,23 @@ with gr.Blocks(css="style.css") as demo:
                         max_lines=3,
                         placeholder="Enter a Negative Prompt",
                         interactive=True,
-                        value="deformed, ugly, wrong proportion, low res, bad anatomy, worst quality, low quality"
+                        value="deformed, ugly, wrong proportion, low res, bad anatomy, worst quality, low quality",
                     )
-        
+
         with gr.Row(elem_classes="flex-grow"):
             image_prompt = gr.Image(
-                    label="Reference Image for customization",
-                    interactive=True,
-                    height=280
-                )
-                
+                label="Reference Image for customization", interactive=True, height=280
+            )
 
         with gr.Group():
             with gr.Column(elem_classes="grid-item"):  # 右侧列
                 with gr.Row(elem_classes="flex-grow"):
-                    
+
                     with gr.Group():
                         # result = gr.Gallery(label="Result", show_label=False, rows=1, columns=1)
-                        result = gr.Image(label="Result", show_label=False, height=238, width=256)
+                        result = gr.Image(
+                            label="Result", show_label=False, height=238, width=256
+                        )
                         generate_button = gr.Button(value="Generate", variant="primary")
 
     with gr.Accordion("Advanced options", open=True):
@@ -287,10 +296,10 @@ with gr.Blocks(css="style.css") as demo:
                         "AOM3 (SD-based)",
                         "SD1.5-512",
                         "RealVis-v5.1 (SD-based)",
-                        "SDXL-1024", 
+                        "SDXL-1024",
                         "RealVisXL-v5.0 (SDXL-based)",
                         "Animagine-XL-v4.0 (SDXL-based)",
-                        "FLUX-schnell"
+                        "FLUX-schnell",
                     ],
                     label="Model",
                     value="RealVis-v5.1 (SD-based)",
@@ -350,7 +359,7 @@ with gr.Blocks(css="style.css") as demo:
             condition_scale,
             warmup_ratio,
             seed,
-            model_choice
+            model_choice,
         ],
         cache_examples=CACHE_EXAMPLES,
     )
@@ -360,7 +369,7 @@ with gr.Blocks(css="style.css") as demo:
     #     inputs=gr.Number(0, visible=False),
     #     outputs=generate_button,
     # )
-    
+
     # .then(fn=change_model_fn, inputs=model_choice).then(
     #     fn=change_generate_button_fn,
     #     inputs=gr.Number(1, visible=False),
@@ -377,7 +386,7 @@ with gr.Blocks(css="style.css") as demo:
         condition_scale,
         warmup_ratio,
         seed,
-        model_choice
+        model_choice,
     ]
     generate_button.click(
         fn=dynamic_gallery_fn,

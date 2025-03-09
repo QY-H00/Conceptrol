@@ -128,7 +128,9 @@ class FluxConceptrolPipeline(FluxPipeline):
 
         if conceptrol is None:
             if not hasattr(self, "conceptrol"):
-                raise ValueError("Default conceptrol not loaded. Please call load_conceptrol() first.")
+                raise ValueError(
+                    "Default conceptrol not loaded. Please call load_conceptrol() first."
+                )
             conceptrol = self.conceptrol
 
         conditions = [Condition("subject", image.convert("RGB").resize((512, 512)))]
