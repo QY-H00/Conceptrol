@@ -87,7 +87,7 @@ gradio gradio_src/app.py
 If you found this repository/our paper useful, please consider citing:
 
 ``` bibtex
-@article{he2024aid,
+@article{he2025conceptrol,
   title={Conceptrol: Concept Control of Zero-shot Personalized Image Generation},
   author={He, Qiyuan and Yao, Angela},
   journal={tbd},
