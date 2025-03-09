@@ -93,6 +93,7 @@ class Condition(object):
         cond_img = (
             cond_img - pipe.vae.config.shift_factor
         ) * pipe.vae.config.scaling_factor
+        print("Cond_img.shape", cond_img.shape)
         cond_tokens = pipe._pack_latents(cond_img, *cond_img.shape)
         cond_ids = pipe._prepare_latent_image_ids(
             cond_img.shape[0],
@@ -101,6 +102,8 @@ class Condition(object):
             pipe.device,
             pipe.dtype,
         )
+        print("Cond_tokens.shape", cond_tokens.shape)
+        print("Cond_ids.shape", cond_ids.shape)
         return cond_tokens, cond_ids
 
     def encode(self, pipe: FluxPipeline) -> Tuple[torch.Tensor, torch.Tensor, int]:
