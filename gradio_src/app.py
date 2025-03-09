@@ -27,7 +27,7 @@ description = r"""
 <b>Official 🤗 Gradio demo</b> for <a href='https://github.com/QY-H00/Conceptrol/tree/public' target='_blank'><b>Conceptrol: Concept Control of Zero-shot Personalized Image Generation</b></a>.<br>
 How to use:<br>
 1. Input text prompt, visual specification and the textual concept of the personalized target.
-2. Choose your preferrd base model, the first time for switching might take 30 minutes to download the model.
+2. Choose your preferrd base model, the first time for switching might take longer time to download the model.
 3. For each inference, SD-series takes about 10s, SDXL-series takes about 30s, FLUX takes about 50s.
 4. Click the <b>Generate</b> button to enjoy! 😊
 """

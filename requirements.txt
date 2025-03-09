@@ -7,3 +7,5 @@ sentencepiece
 gradio
 jupyter
 torchao
+einops
+matplotlib
