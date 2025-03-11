@@ -15,7 +15,7 @@
 </div>
 
 <div align="center">
-<a href=https://arxiv.org/abs/2403.17924 target="_blank"><img src=https://img.shields.io/badge/arXiv-b5212f.svg?logo=arxiv height=25px></a>
+<a href=https://arxiv.org/abs/2503.06568 target="_blank"><img src=https://img.shields.io/badge/arXiv-b5212f.svg?logo=arxiv height=25px></a>
 <a href=https://huggingface.co/spaces/qyoo/Conceptrol target="_blank"><img src=https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face%20Space-276cb4.svg height=25px></a>
 <a href=https://qy-h00.github.io/Conceptrol target="_blank"><img src= https://img.shields.io/badge/GitHub%20Project%20Page-bb8a2e.svg?logo=github height=25px></a>
 </div>
@@ -87,11 +87,14 @@ gradio gradio_src/app.py
 If you found this repository/our paper useful, please consider citing:
 
 ``` bibtex
-@article{he2025conceptrol,
-  title={Conceptrol: Concept Control of Zero-shot Personalized Image Generation},
-  author={He, Qiyuan and Yao, Angela},
-  journal={tbd},
-  year={2024}
+@misc{he2025conceptrolconceptcontrolzeroshot,
+      title={Conceptrol: Concept Control of Zero-shot Personalized Image Generation}, 
+      author={Qiyuan He and Angela Yao},
+      year={2025},
+      eprint={2503.06568},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2503.06568}, 
 }
 ```
 
